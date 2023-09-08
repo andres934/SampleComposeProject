@@ -5,13 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,14 +31,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.androidtechchallenge.model.CompletedChallenge
+import com.example.androidtechchallenge.data.model.CompletedChallengeDto
 import com.example.androidtechchallenge.ui.navigation.AppScreens
 import com.example.androidtechchallenge.ui.theme.AccentColor
 import com.example.androidtechchallenge.ui.theme.DarkGrey
@@ -49,6 +45,9 @@ import com.example.androidtechchallenge.ui.theme.LightGrey
 import com.example.androidtechchallenge.ui.theme.PrimaryLightGrey
 import com.example.androidtechchallenge.util.getFormattedDateString
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.androidtechchallenge.domain.models.ChallengeItem
+import com.example.androidtechchallenge.ui.components.ErrorScreen
+import com.example.androidtechchallenge.ui.components.LoadingScreen
 
 @ExperimentalMaterial3Api
 @Composable
@@ -65,7 +64,7 @@ fun ChallengesListScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Challenges List",
+                        text = "Completed Challenges",
                         color = AccentColor,
                         fontWeight = FontWeight.Bold
                     )
@@ -117,7 +116,7 @@ fun ChallengesListBody(
                     state = listState
                 ) {
                     items(uiState.challenges.data) {
-                        ChallengeItem(
+                        ChallengeUIItem(
                             item = it,
                             onItemClicked = { id ->
                                 navController.navigate(AppScreens.ChallengeDetailScreen.route + "/$id")
@@ -128,37 +127,11 @@ fun ChallengesListBody(
             }
 
             is ListUiState.Loading -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(
-                        color = AccentColor,
-                        strokeWidth = 2.dp
-                    )
-                }
+                LoadingScreen()
             }
 
             is ListUiState.Failed -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Please try again later...",
-                        color = AccentColor,
-                        modifier = Modifier
-                            .background(
-                                color = LightGrey,
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .padding(8.dp)
-                    )
-                }
+                ErrorScreen()
             }
         }
 
@@ -166,7 +139,7 @@ fun ChallengesListBody(
 }
 
 @Composable
-fun ChallengeItem(item: CompletedChallenge, onItemClicked: (String) -> Unit) {
+fun ChallengeUIItem(item: ChallengeItem, onItemClicked: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -185,13 +158,12 @@ fun ChallengeItem(item: CompletedChallenge, onItemClicked: (String) -> Unit) {
                 color = PrimaryLightGrey,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            item.completedAt.getFormattedDateString()?.run {
-                Text(
-                    text = this,
-                    color = PrimaryLightGrey,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
+
+            Text(
+                text = item.completedAt,
+                color = PrimaryLightGrey,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
             Text(text = item.completedLanguages.joinToString(), color = PrimaryLightGrey)
         }

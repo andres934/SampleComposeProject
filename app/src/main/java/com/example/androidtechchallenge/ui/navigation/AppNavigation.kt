@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.androidtechchallenge.data.ChallengesRepository
 import com.example.androidtechchallenge.ui.screens.details.ChallengeDetailScreen
 import com.example.androidtechchallenge.ui.screens.list.ChallengesListScreen
 
@@ -27,7 +28,9 @@ fun AppNavigation() {
                 type = NavType.StringType
             })
         ) {
-            ChallengeDetailScreen(navController, it.arguments?.getString("idChallenge"))
+            ChallengeDetailScreen(
+                navController = navController,
+                challengeId = it.arguments?.getString("idChallenge"))
         }
     }
 }

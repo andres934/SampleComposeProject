@@ -1,37 +1,43 @@
 package com.example.androidtechchallenge.data
 
-import com.example.androidtechchallenge.model.ChallengeResponse
-import com.example.androidtechchallenge.model.CompletedChallenge
-import com.example.androidtechchallenge.model.Rank
-import com.example.androidtechchallenge.model.UserInfo
+import com.example.androidtechchallenge.data.model.ChallengeResponse
+import com.example.androidtechchallenge.data.model.CompletedChallengeDto
+import com.example.androidtechchallenge.data.model.CompletedChallengesResponse
+import com.example.androidtechchallenge.data.model.RankDto
+import com.example.androidtechchallenge.data.model.UserInfoDto
 
-val challengesMockItems = listOf(
-    CompletedChallenge(
-        id = "514b92a657cdc65150000006",
-        name = "Multiples of 3 and 5",
-        slug = "multiples-of-3-and-5",
-        completedAt = "2017-04-06T16:32:09Z",
-        completedLanguages = listOf(
-            "javascript",
-            "coffeescript",
-            "ruby",
-            "C++",
-            "kotlin",
-            "typescript",
-        )
-    ),
-    CompletedChallenge(
-        id = "514b92a657cdc65150000126",
-        name = "Predict your age!",
-        slug = "predict-your-age!",
-        completedAt = "2018-04-06T16:32:09Z",
-        completedLanguages = listOf(
-            "kotlin",
-            "typescript",
-            "ruby",
-            "php",
-            "java"
-        )
+val completedChallengesItemMock =
+    CompletedChallengesResponse(
+        totalPages = 0,
+        totalItems = 2,
+        data = listOf(
+            CompletedChallengeDto(
+                id = "514b92a657cdc65150000006",
+                name = "Multiples of 3 and 5",
+                slug = "multiples-of-3-and-5",
+                completedAt = "2017-04-06T16:32:09Z",
+                completedLanguages = listOf(
+                    "javascript",
+                    "coffeescript",
+                    "ruby",
+                    "C++",
+                    "kotlin",
+                    "typescript",
+                )
+            ),
+            CompletedChallengeDto(
+                id = "514b92a657cdc65150000126",
+                name = "Predict your age!",
+                slug = "predict-your-age!",
+                completedAt = "2018-04-06T16:32:09Z",
+                completedLanguages = listOf(
+                    "kotlin",
+                    "typescript",
+                    "ruby",
+                    "php",
+                    "java"
+                )
+            )
     )
 )
 
@@ -46,16 +52,16 @@ val challengeDetailMockItem = ChallengeResponse(
             "Given an array describing the color of each glove, return the number of pairs you can constitute, assuming that only gloves of the same color can form pairs",
     tags = listOf("Algorithms", "Validation", "Logic", "Utilities"),
     languages = listOf("javascript", "coffeescript"),
-    rank = Rank(
+    rank = RankDto(
         id = -4,
         name = "4 kyu",
         color = "blue"
     ),
-    createdBy = UserInfo(
+    createdBy = UserInfoDto(
         username = "xDranik",
         url = "http://www.codewars.com/users/xDranik"
     ),
-    approvedBy = UserInfo(
+    approvedBy = UserInfoDto(
         username = "xDranik",
         url = "http://www.codewars.com/users/xDranik"
     ),

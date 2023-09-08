@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -38,6 +39,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,20 +54,33 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.androidtechchallenge.R
-import com.example.androidtechchallenge.data.challengeDetailMockItem
-import com.example.androidtechchallenge.model.ChallengeResponse
+import com.example.androidtechchallenge.data.model.ChallengeResponse
 import com.example.androidtechchallenge.ui.theme.AccentColor
 import com.example.androidtechchallenge.ui.theme.DarkGrey
 import com.example.androidtechchallenge.ui.theme.LightGrey
 import com.example.androidtechchallenge.ui.theme.PrimaryLightGrey
 import com.example.androidtechchallenge.util.getFormattedDateString
 import com.example.androidtechchallenge.util.getRankColorFromString
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.androidtechchallenge.domain.models.ChallengeDetails
+import com.example.androidtechchallenge.ui.components.ErrorScreen
+import com.example.androidtechchallenge.ui.components.LoadingScreen
 
 @ExperimentalMaterial3Api
 @Composable
-fun ChallengeDetailScreen(navController: NavController, challengeId: String?) {
-    val scrollState = rememberScrollState()
+fun ChallengeDetailScreen(
+    navController: NavController,
+    viewModel: ChallengeDetailViewModel = viewModel(),
+    challengeId: String?
+) {
     val context = LocalView.current.context
+    val scrollState = rememberScrollState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    challengeId?.run {
+        viewModel.getChallengeDetailsById(challengeId)
+    } ?: viewModel.setErrorState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,7 +97,11 @@ fun ChallengeDetailScreen(navController: NavController, challengeId: String?) {
                                 }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Challenge Details", color = AccentColor, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "Challenge Details",
+                            color = AccentColor,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = DarkGrey)
@@ -89,9 +109,9 @@ fun ChallengeDetailScreen(navController: NavController, challengeId: String?) {
         }
     ) {
         ChallengeDetailBody(
-            item = challengeDetailMockItem,
             paddingValues = it,
             scrollState = scrollState,
+            uiState = uiState,
             onLinkClicked = { link ->
                 val urlIntent = Intent(
                     Intent.ACTION_VIEW,
@@ -105,9 +125,9 @@ fun ChallengeDetailScreen(navController: NavController, challengeId: String?) {
 
 @Composable
 fun ChallengeDetailBody(
-    item: ChallengeResponse,
     paddingValues: PaddingValues,
     scrollState: ScrollState,
+    uiState: DetailUIState,
     onLinkClicked: (String) -> Unit
 ) {
     Column(
@@ -118,21 +138,26 @@ fun ChallengeDetailBody(
                 start = 8.dp,
                 end = 8.dp
             )
-            .fillMaxWidth()
+            .fillMaxSize()
             .verticalScroll(scrollState, true),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        when (uiState) {
+            is DetailUIState.Success -> {
+                ChallengeDetailHeader(uiState.challenge)
 
-        ChallengeDetailHeader(item)
+                ChallengeDetailDescription(uiState.challenge)
 
-        ChallengeDetailDescription(item)
-
-        ChallengeDetailStats(item = item, onLinkClicked = onLinkClicked)
+                ChallengeDetailStats(item = uiState.challenge, onLinkClicked = onLinkClicked)
+            }
+            is DetailUIState.Loading -> LoadingScreen()
+            is DetailUIState.Failed -> ErrorScreen()
+        }
     }
 }
 
 @Composable
-fun ChallengeDetailHeader(item: ChallengeResponse) {
+fun ChallengeDetailHeader(item: ChallengeDetails) {
     Box(
         modifier = Modifier
             .background(LightGrey, shape = RoundedCornerShape(8.dp))
@@ -146,18 +171,21 @@ fun ChallengeDetailHeader(item: ChallengeResponse) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                val rankColor = item.rank.getRankColorFromString()
-                Text(
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(DarkGrey, CutCornerShape(10.dp))
-                        .border(4.dp, rankColor, CutCornerShape(10.dp))
-                        .padding(8.dp),
-                    text = item.rank.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = rankColor
-                )
+                item.rank?.run {
+                    val rankColor = getRankColorFromString()
+                    Text(
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(DarkGrey, CutCornerShape(10.dp))
+                            .border(4.dp, rankColor, CutCornerShape(10.dp))
+                            .padding(8.dp),
+                        text = item.rank.name,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = rankColor
+                    )
+                }
+
                 Text(
                     modifier = Modifier.padding(start = 8.dp, end = 12.dp),
                     text = item.name,
@@ -211,7 +239,7 @@ fun ChallengeDetailHeader(item: ChallengeResponse) {
 }
 
 @Composable
-fun ChallengeDetailDescription(item: ChallengeResponse) {
+fun ChallengeDetailDescription(item: ChallengeDetails) {
     Box(
         modifier = Modifier
             .background(LightGrey, shape = RoundedCornerShape(8.dp))
@@ -258,7 +286,7 @@ fun ChallengeDetailDescription(item: ChallengeResponse) {
 }
 
 @Composable
-fun ChallengeDetailStats(item: ChallengeResponse, onLinkClicked: (String) -> Unit) {
+fun ChallengeDetailStats(item: ChallengeDetails, onLinkClicked: (String) -> Unit) {
     Box(
         modifier = Modifier
             .background(LightGrey, shape = RoundedCornerShape(8.dp))
@@ -277,11 +305,11 @@ fun ChallengeDetailStats(item: ChallengeResponse, onLinkClicked: (String) -> Uni
             DetailStatsItem(title = "Total stars", value = "${item.totalStars}")
             DetailStatsItem(title = "Vote score", value = "${item.voteScore}")
             DetailStatsItem(title = "Created by", value = item.createdBy.username) {
-                onLinkClicked(item.createdBy.url)
+                if (item.createdBy.url.isNotEmpty()) {
+                    onLinkClicked(item.createdBy.url)
+                }
             }
-            item.publishedAt.getFormattedDateString()?.run {
-                DetailStatsItem(title = "Published at", value = this)
-            }
+            DetailStatsItem(title = "Published at", value = item.publishedAt)
         }
     }
 }

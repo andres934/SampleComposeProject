@@ -1,6 +1,6 @@
-package com.example.androidtechchallenge.model
+package com.example.androidtechchallenge.domain.models
 
-data class ChallengeResponse(
+data class ChallengeDetails(
     val id: String,
     val name: String,
     val slug: String,
@@ -9,7 +9,7 @@ data class ChallengeResponse(
     val description: String,
     val tags: List<String>,
     val languages: List<String>,
-    val rank: Rank,
+    val rank: Rank?,
     val createdBy: UserInfo,
     val approvedBy: UserInfo,
     val totalAttempts: Long,

@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidtechchallenge.data.ChallengesRepository
-import kotlinx.coroutines.CoroutineDispatcher
+import com.example.androidtechchallenge.domain.toCompletedChallenges
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,8 @@ import kotlin.coroutines.CoroutineContext
 
 class ChallengesListViewModel(
     private val repository: ChallengesRepository = ChallengesRepository(),
-    private val backgroundCoroutineContext: CoroutineContext = Dispatchers.IO
+    private val backgroundCoroutineContext: CoroutineContext = Dispatchers.IO,
+    private val foregroundCoroutineContext: CoroutineContext = Dispatchers.Main,
 ): ViewModel() {
 
     private val _uiState: MutableStateFlow<ListUiState> = MutableStateFlow(ListUiState.Loading)
@@ -26,25 +27,20 @@ class ChallengesListViewModel(
     }
 
     private fun getCompletedChallengesList() {
-        viewModelScope.launch {
+        viewModelScope.launch(foregroundCoroutineContext) {
             runCatching {
                 withContext(backgroundCoroutineContext) {
-                    delay(2000)
                     repository.getCompletedChallenges()
                 }
             }.fold(
                 {
                     val result = it?.run {
-                        ListUiState.Success(this)
+                        ListUiState.Success(toCompletedChallenges())
                     } ?: ListUiState.Failed
 
                     _uiState.emit(result)
                 },
-                { error ->
-                    Log.e(
-                        "CompletedChallengesError",
-                        error.message ?: "Failed to get Completed Challenges data"
-                    )
+                {
                     _uiState.emit(ListUiState.Failed)
                 }
             )
@@ -52,30 +48,24 @@ class ChallengesListViewModel(
     }
 
     fun refreshCompletedChallengesList() {
-        viewModelScope.launch {
+        viewModelScope.launch(foregroundCoroutineContext) {
             runCatching {
                 _uiState.emit(ListUiState.Loading)
-                delay(2000)
                 withContext(backgroundCoroutineContext) {
                     repository.getCompletedChallenges()
                 }
             }.fold(
                 {
                     val result = it?.run {
-                        ListUiState.Success(this)
+                        ListUiState.Success(toCompletedChallenges())
                     } ?: ListUiState.Failed
 
                     _uiState.emit(result)
                 },
-                { error ->
-                    Log.e(
-                        "CompletedChallengesError",
-                        error.message ?: "Failed to refresh Completed Challenges data"
-                    )
+                {
                     _uiState.emit(ListUiState.Failed)
                 }
             )
         }
     }
-
 }
