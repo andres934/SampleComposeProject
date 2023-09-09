@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.androidtechchallenge.ui.theme.AccentColor
 import com.example.androidtechchallenge.ui.theme.LightGrey
@@ -19,7 +20,8 @@ import com.example.androidtechchallenge.ui.theme.LightGrey
 fun LoadingScreen() {
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .testTag("ProgressIndicatorContainer"),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -34,7 +36,8 @@ fun LoadingScreen() {
 fun ErrorScreen() {
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .testTag("ErrorIndicatorContainer"),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

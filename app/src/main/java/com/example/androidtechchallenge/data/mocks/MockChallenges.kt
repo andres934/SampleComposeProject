@@ -1,4 +1,4 @@
-package com.example.androidtechchallenge.data
+package com.example.androidtechchallenge.data.mocks
 
 import com.example.androidtechchallenge.data.model.ChallengeResponse
 import com.example.androidtechchallenge.data.model.CompletedChallengeDto

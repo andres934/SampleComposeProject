@@ -1,7 +1,9 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.example.androidtechchallenge
 
-import com.example.androidtechchallenge.data.ChallengesRepository
-import com.example.androidtechchallenge.data.challengeDetailMockItem
+import com.example.androidtechchallenge.data.ChallengesRepositoryImpl
+import com.example.androidtechchallenge.data.mocks.challengeDetailMockItem
 import com.example.androidtechchallenge.domain.toChallengeDetails
 import com.example.androidtechchallenge.ui.screens.details.ChallengeDetailViewModel
 import com.example.androidtechchallenge.ui.screens.details.DetailUIState
@@ -9,13 +11,14 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 
 class ChallengeDetailViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val mockRepository = mockk<ChallengesRepository>()
+    private val mockRepository = mockk<ChallengesRepositoryImpl>()
 
     @Test
     fun `on viewModel initialized uiState starts with Loading as default`() {

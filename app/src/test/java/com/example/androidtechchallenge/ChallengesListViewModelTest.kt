@@ -1,7 +1,9 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.example.androidtechchallenge
 
-import com.example.androidtechchallenge.data.ChallengesRepository
-import com.example.androidtechchallenge.data.completedChallengesItemMock
+import com.example.androidtechchallenge.data.ChallengesRepositoryImpl
+import com.example.androidtechchallenge.data.mocks.completedChallengesItemMock
 import com.example.androidtechchallenge.domain.toCompletedChallenges
 import com.example.androidtechchallenge.ui.screens.list.ChallengesListViewModel
 import com.example.androidtechchallenge.ui.screens.list.ListUiState
@@ -10,13 +12,14 @@ import io.mockk.coJustAwait
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 
 class ChallengesListViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val mockRepository = mockk<ChallengesRepository>()
+    private val mockRepository = mockk<ChallengesRepositoryImpl>()
 
     @Test
     fun `on viewModel initialized uiState starts with Loading and calls getCompletedChallenges`() {

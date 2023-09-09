@@ -1,12 +1,11 @@
 package com.example.androidtechchallenge.ui.screens.list
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.androidtechchallenge.data.ChallengesRepositoryImpl
 import com.example.androidtechchallenge.data.ChallengesRepository
 import com.example.androidtechchallenge.domain.toCompletedChallenges
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -14,7 +13,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 class ChallengesListViewModel(
-    private val repository: ChallengesRepository = ChallengesRepository(),
+    private val repository: ChallengesRepository = ChallengesRepositoryImpl(),
     private val backgroundCoroutineContext: CoroutineContext = Dispatchers.IO,
     private val foregroundCoroutineContext: CoroutineContext = Dispatchers.Main,
 ): ViewModel() {

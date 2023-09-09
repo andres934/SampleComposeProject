@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.androidtechchallenge.ui.screens.list
 
 import androidx.compose.foundation.ScrollState
@@ -32,24 +34,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.androidtechchallenge.data.model.CompletedChallengeDto
 import com.example.androidtechchallenge.ui.navigation.AppScreens
 import com.example.androidtechchallenge.ui.theme.AccentColor
 import com.example.androidtechchallenge.ui.theme.DarkGrey
 import com.example.androidtechchallenge.ui.theme.LightGrey
 import com.example.androidtechchallenge.ui.theme.PrimaryLightGrey
-import com.example.androidtechchallenge.util.getFormattedDateString
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.androidtechchallenge.domain.models.ChallengeItem
 import com.example.androidtechchallenge.ui.components.ErrorScreen
 import com.example.androidtechchallenge.ui.components.LoadingScreen
 
-@ExperimentalMaterial3Api
 @Composable
 fun ChallengesListScreen(
     navController: NavController,
@@ -147,6 +147,7 @@ fun ChallengeUIItem(item: ChallengeItem, onItemClicked: (String) -> Unit) {
             .clickable(enabled = true) {
                 onItemClicked(item.id)
             }
+            .testTag("ListItemContainer")
     ) {
         Column(
             modifier = Modifier

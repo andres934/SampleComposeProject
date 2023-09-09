@@ -1,7 +1,7 @@
 package com.example.androidtechchallenge
 
-import com.example.androidtechchallenge.data.challengeDetailMockItem
-import com.example.androidtechchallenge.data.completedChallengesItemMock
+import com.example.androidtechchallenge.data.mocks.challengeDetailMockItem
+import com.example.androidtechchallenge.data.mocks.completedChallengesItemMock
 import com.example.androidtechchallenge.data.model.CompletedChallengeDto
 import com.example.androidtechchallenge.data.model.UserInfoDto
 import com.example.androidtechchallenge.domain.models.ChallengeDetails
