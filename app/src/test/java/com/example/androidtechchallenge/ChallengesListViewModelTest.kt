@@ -4,11 +4,11 @@ package com.example.androidtechchallenge
 
 import com.example.androidtechchallenge.data.ChallengesRepositoryImpl
 import com.example.androidtechchallenge.data.mocks.completedChallengesItemMock
+import com.example.androidtechchallenge.domain.ChallengesUseCase
 import com.example.androidtechchallenge.domain.toCompletedChallenges
 import com.example.androidtechchallenge.ui.screens.list.ChallengesListViewModel
 import com.example.androidtechchallenge.ui.screens.list.ListUiState
 import io.mockk.coEvery
-import io.mockk.coJustAwait
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
@@ -20,29 +20,18 @@ class ChallengesListViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val mockRepository = mockk<ChallengesRepositoryImpl>()
+    private val useCase = ChallengesUseCase(repository = mockRepository)
 
     @Test
-    fun `on viewModel initialized uiState starts with Loading and calls getCompletedChallenges`() {
-        // Given
-        coJustAwait {
-            mockRepository.getCompletedChallenges()
-        }
-
+    fun `on viewModel initialized uiState starts with Loading`() {
         // When
         val viewModel = ChallengesListViewModel(
-            repository = mockRepository,
-            backgroundCoroutineContext = testDispatcher,
-            foregroundCoroutineContext = testDispatcher
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
         )
 
         // Then
-        coVerify(exactly = 1) {
-            mockRepository.getCompletedChallenges()
-        }
-
         assert(viewModel.uiState.value is ListUiState.Loading)
-
-        confirmVerified(mockRepository)
     }
 
     @Test
@@ -54,10 +43,11 @@ class ChallengesListViewModelTest {
 
         // When
         val viewModel = ChallengesListViewModel(
-            repository = mockRepository,
-            backgroundCoroutineContext = testDispatcher,
-            foregroundCoroutineContext = testDispatcher
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
         )
+
+        viewModel.getCompletedChallengesList()
 
         // Then
         coVerify(exactly = 1) {
@@ -78,16 +68,15 @@ class ChallengesListViewModelTest {
         } returns completedChallengesItemMock
 
         val viewModel = ChallengesListViewModel(
-            repository = mockRepository,
-            backgroundCoroutineContext = testDispatcher,
-            foregroundCoroutineContext = testDispatcher
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
         )
 
         // When
         viewModel.refreshCompletedChallengesList()
 
         // Then
-        coVerify(exactly = 2) {
+        coVerify(exactly = 1) {
             mockRepository.getCompletedChallenges()
         }
 
@@ -107,10 +96,10 @@ class ChallengesListViewModelTest {
 
         // When
         val viewModel = ChallengesListViewModel(
-            repository = mockRepository,
-            backgroundCoroutineContext = testDispatcher,
-            foregroundCoroutineContext = testDispatcher
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
         )
+        viewModel.getCompletedChallengesList()
 
         // Then
         coVerify(exactly = 1) {
@@ -131,16 +120,15 @@ class ChallengesListViewModelTest {
         } throws expectedException
 
         val viewModel = ChallengesListViewModel(
-            repository = mockRepository,
-            backgroundCoroutineContext = testDispatcher,
-            foregroundCoroutineContext = testDispatcher
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
         )
 
         // When
         viewModel.refreshCompletedChallengesList()
 
         // Then
-        coVerify(exactly = 2) {
+        coVerify(exactly = 1) {
             mockRepository.getCompletedChallenges()
         }
 

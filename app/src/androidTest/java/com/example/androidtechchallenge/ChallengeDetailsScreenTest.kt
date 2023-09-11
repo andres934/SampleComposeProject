@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.navigation.compose.rememberNavController
 import com.example.androidtechchallenge.data.mocks.FakeRepositoryImpl
 import com.example.androidtechchallenge.data.mocks.challengeDetailMockItem
+import com.example.androidtechchallenge.domain.ChallengesUseCase
 import com.example.androidtechchallenge.domain.toChallengeDetails
 import com.example.androidtechchallenge.ui.screens.details.ChallengeDetailScreen
 import com.example.androidtechchallenge.ui.screens.details.ChallengeDetailViewModel
@@ -29,17 +30,15 @@ class ChallengeDetailsScreenTest {
     private val testDispatcher = StandardTestDispatcher()
     private val fakeRepository = FakeRepositoryImpl()
     private val fakeChallengeId = "FakeId"
+    private val useCase = ChallengesUseCase(fakeRepository)
 
     @Test
     fun challengesDetailsScreenShouldShowItemInformationWhenCallSucceeds() {
         val expectedMappedChallenge = challengeDetailMockItem.toChallengeDetails()
-        val viewModel by lazy {
-            ChallengeDetailViewModel(
-                repository = fakeRepository,
-                backgroundCoroutineContext = testDispatcher,
-                foregroundCoroutineContext = testDispatcher
-            )
-        }
+        val viewModel = ChallengeDetailViewModel(
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
+        )
         rule.setContent {
             ChallengeDetailScreen(
                 navController = rememberNavController(),
@@ -94,13 +93,10 @@ class ChallengeDetailsScreenTest {
     @Test
     fun shouldShowErrorMessageIfCallFails() {
         val fakeFailRepository = FakeRepositoryImpl(shouldFail = true)
-        val viewModel by lazy {
-            ChallengeDetailViewModel(
-                repository = fakeFailRepository,
-                backgroundCoroutineContext = testDispatcher,
-                foregroundCoroutineContext = testDispatcher
-            )
-        }
+        val viewModel = ChallengeDetailViewModel(
+            useCase = ChallengesUseCase(fakeFailRepository),
+            backgroundCoroutineContext = testDispatcher
+        )
         rule.setContent {
             ChallengeDetailScreen(
                 navController = rememberNavController(),

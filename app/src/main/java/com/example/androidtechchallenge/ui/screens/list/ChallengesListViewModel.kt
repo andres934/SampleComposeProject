@@ -2,39 +2,29 @@ package com.example.androidtechchallenge.ui.screens.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.androidtechchallenge.data.ChallengesRepositoryImpl
-import com.example.androidtechchallenge.data.ChallengesRepository
-import com.example.androidtechchallenge.domain.toCompletedChallenges
+import com.example.androidtechchallenge.domain.ChallengesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 class ChallengesListViewModel(
-    private val repository: ChallengesRepository = ChallengesRepositoryImpl(),
-    private val backgroundCoroutineContext: CoroutineContext = Dispatchers.IO,
-    private val foregroundCoroutineContext: CoroutineContext = Dispatchers.Main,
-): ViewModel() {
+    private val useCase: ChallengesUseCase = ChallengesUseCase(),
+    private val backgroundCoroutineContext: CoroutineContext = Dispatchers.IO
+) : ViewModel() {
 
     private val _uiState: MutableStateFlow<ListUiState> = MutableStateFlow(ListUiState.Loading)
     val uiState: StateFlow<ListUiState> = _uiState
 
-    init {
-        getCompletedChallengesList()
-    }
-
-    private fun getCompletedChallengesList() {
-        viewModelScope.launch(foregroundCoroutineContext) {
+    fun getCompletedChallengesList() {
+        viewModelScope.launch(backgroundCoroutineContext) {
             runCatching {
-                withContext(backgroundCoroutineContext) {
-                    repository.getCompletedChallenges()
-                }
+                useCase.getCompletedChallengesList()
             }.fold(
                 {
                     val result = it?.run {
-                        ListUiState.Success(toCompletedChallenges())
+                        ListUiState.Success(this)
                     } ?: ListUiState.Failed
 
                     _uiState.emit(result)
@@ -47,24 +37,9 @@ class ChallengesListViewModel(
     }
 
     fun refreshCompletedChallengesList() {
-        viewModelScope.launch(foregroundCoroutineContext) {
-            runCatching {
-                _uiState.emit(ListUiState.Loading)
-                withContext(backgroundCoroutineContext) {
-                    repository.getCompletedChallenges()
-                }
-            }.fold(
-                {
-                    val result = it?.run {
-                        ListUiState.Success(toCompletedChallenges())
-                    } ?: ListUiState.Failed
-
-                    _uiState.emit(result)
-                },
-                {
-                    _uiState.emit(ListUiState.Failed)
-                }
-            )
+        viewModelScope.launch(backgroundCoroutineContext) {
+            _uiState.emit(ListUiState.Loading)
         }
+        getCompletedChallengesList()
     }
 }

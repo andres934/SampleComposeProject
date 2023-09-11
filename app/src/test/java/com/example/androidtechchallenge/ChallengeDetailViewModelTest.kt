@@ -4,6 +4,7 @@ package com.example.androidtechchallenge
 
 import com.example.androidtechchallenge.data.ChallengesRepositoryImpl
 import com.example.androidtechchallenge.data.mocks.challengeDetailMockItem
+import com.example.androidtechchallenge.domain.ChallengesUseCase
 import com.example.androidtechchallenge.domain.toChallengeDetails
 import com.example.androidtechchallenge.ui.screens.details.ChallengeDetailViewModel
 import com.example.androidtechchallenge.ui.screens.details.DetailUIState
@@ -19,14 +20,14 @@ class ChallengeDetailViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val mockRepository = mockk<ChallengesRepositoryImpl>()
+    private val useCase = ChallengesUseCase(repository = mockRepository)
 
     @Test
     fun `on viewModel initialized uiState starts with Loading as default`() {
         // Given
         val viewModel = ChallengeDetailViewModel(
-            repository = mockRepository,
-            backgroundCoroutineContext = testDispatcher,
-            foregroundCoroutineContext = testDispatcher
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
         )
 
         // Then
@@ -42,9 +43,8 @@ class ChallengeDetailViewModelTest {
         } returns challengeDetailMockItem
 
         val viewModel = ChallengeDetailViewModel(
-            repository = mockRepository,
-            backgroundCoroutineContext = testDispatcher,
-            foregroundCoroutineContext = testDispatcher
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
         )
 
         // When
@@ -70,9 +70,8 @@ class ChallengeDetailViewModelTest {
         } throws expectedException
 
         val viewModel = ChallengeDetailViewModel(
-            repository = mockRepository,
-            backgroundCoroutineContext = testDispatcher,
-            foregroundCoroutineContext = testDispatcher
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
         )
 
         // When
@@ -82,6 +81,25 @@ class ChallengeDetailViewModelTest {
         coVerify(exactly = 1) {
             mockRepository.getChallengeDetails(expectedId)
         }
+        assert(viewModel.uiState.value is DetailUIState.Failed)
+
+        confirmVerified(mockRepository)
+    }
+
+    @Test
+    fun `on challenge id null passed should fail call and uiState updates to Failed`() {
+        // Given
+        val expectedId: String? = null
+
+        val viewModel = ChallengeDetailViewModel(
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
+        )
+
+        // When
+        viewModel.getChallengeDetailsById(expectedId)
+
+        // Then
         assert(viewModel.uiState.value is DetailUIState.Failed)
 
         confirmVerified(mockRepository)

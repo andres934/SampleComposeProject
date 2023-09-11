@@ -4,7 +4,6 @@ package com.example.androidtechchallenge.ui.screens.details
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,15 +52,14 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.androidtechchallenge.R
-import com.example.androidtechchallenge.data.model.ChallengeResponse
 import com.example.androidtechchallenge.ui.theme.AccentColor
 import com.example.androidtechchallenge.ui.theme.DarkGrey
 import com.example.androidtechchallenge.ui.theme.LightGrey
 import com.example.androidtechchallenge.ui.theme.PrimaryLightGrey
-import com.example.androidtechchallenge.util.getFormattedDateString
 import com.example.androidtechchallenge.util.getRankColorFromString
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.androidtechchallenge.domain.models.ChallengeDetails
+import com.example.androidtechchallenge.domain.models.Rank
+import com.example.androidtechchallenge.domain.models.UserInfo
 import com.example.androidtechchallenge.ui.components.ErrorScreen
 import com.example.androidtechchallenge.ui.components.LoadingScreen
 
@@ -77,9 +74,7 @@ fun ChallengeDetailScreen(
     val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
 
-    challengeId?.run {
-        viewModel.getChallengeDetailsById(challengeId)
-    } ?: viewModel.setErrorState()
+    viewModel.getChallengeDetailsById(challengeId)
 
     Scaffold(
         topBar = {
@@ -108,56 +103,96 @@ fun ChallengeDetailScreen(
             )
         }
     ) {
-        ChallengeDetailBody(
-            paddingValues = it,
-            scrollState = scrollState,
-            uiState = uiState,
-            onLinkClicked = { link ->
-                val urlIntent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse(link)
+        Column(
+            modifier = Modifier
+                .padding(
+                    top = it.calculateTopPadding() + 8.dp,
+                    bottom = it.calculateBottomPadding() + 8.dp,
+                    start = 8.dp,
+                    end = 8.dp
                 )
-                startActivity(context, urlIntent, null)
+                .fillMaxSize()
+                .verticalScroll(scrollState, true),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            when (uiState) {
+                is DetailUIState.Success -> {
+                    ChallengeDetailBody(
+                        name = (uiState as DetailUIState.Success).challenge.name,
+                        description = (uiState as DetailUIState.Success).challenge.description,
+                        tags = (uiState as DetailUIState.Success).challenge.tags,
+                        rank = (uiState as DetailUIState.Success).challenge.rank,
+                        createdBy = (uiState as DetailUIState.Success).challenge.createdBy,
+                        totalAttempts = (uiState as DetailUIState.Success).challenge.totalAttempts,
+                        totalCompleted = (uiState as DetailUIState.Success).challenge.totalCompleted,
+                        totalStars = (uiState as DetailUIState.Success).challenge.totalStars,
+                        voteScore = (uiState as DetailUIState.Success).challenge.voteScore,
+                        publishedAt = (uiState as DetailUIState.Success).challenge.publishedAt,
+                        onLinkClicked = { link ->
+                            val urlIntent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(link)
+                            )
+                            startActivity(context, urlIntent, null)
+                        }
+                    )
+                }
+
+                is DetailUIState.Loading -> LoadingScreen()
+                is DetailUIState.Failed -> ErrorScreen()
             }
-        )
+        }
+
     }
 }
 
 @Composable
 fun ChallengeDetailBody(
-    paddingValues: PaddingValues,
-    scrollState: ScrollState,
-    uiState: DetailUIState,
+    name: String,
+    description: String,
+    tags: List<String>,
+    rank: Rank?,
+    createdBy: UserInfo,
+    totalAttempts: Long,
+    totalCompleted: Long,
+    totalStars: Long,
+    voteScore: Long,
+    publishedAt: String,
     onLinkClicked: (String) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .padding(
-                top = paddingValues.calculateTopPadding() + 8.dp,
-                bottom = paddingValues.calculateBottomPadding() + 8.dp,
-                start = 8.dp,
-                end = 8.dp
-            )
-            .fillMaxSize()
-            .verticalScroll(scrollState, true),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        when (uiState) {
-            is DetailUIState.Success -> {
-                ChallengeDetailHeader(uiState.challenge)
+    ChallengeDetailHeader(
+        rank = rank,
+        name = name,
+        totalStars = totalStars,
+        totalCompleted = totalCompleted,
+        creatorUsername = createdBy.username
+    )
 
-                ChallengeDetailDescription(uiState.challenge)
+    ChallengeDetailDescription(
+        itemDescription = description,
+        tags = tags
+    )
 
-                ChallengeDetailStats(item = uiState.challenge, onLinkClicked = onLinkClicked)
-            }
-            is DetailUIState.Loading -> LoadingScreen()
-            is DetailUIState.Failed -> ErrorScreen()
-        }
-    }
+    ChallengeDetailStats(
+        totalAttempts = totalAttempts,
+        totalCompleted = totalCompleted,
+        totalStars = totalStars,
+        voteScore = voteScore,
+        creatorUsername = createdBy.username,
+        creatorUrl = createdBy.url,
+        publishedAt = publishedAt,
+        onLinkClicked = onLinkClicked
+    )
 }
 
 @Composable
-fun ChallengeDetailHeader(item: ChallengeDetails) {
+fun ChallengeDetailHeader(
+    rank: Rank?,
+    name: String,
+    totalStars: Long,
+    totalCompleted: Long,
+    creatorUsername: String
+) {
     Box(
         modifier = Modifier
             .background(LightGrey, shape = RoundedCornerShape(8.dp))
@@ -171,7 +206,7 @@ fun ChallengeDetailHeader(item: ChallengeDetails) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                item.rank?.run {
+                rank?.run {
                     val rankColor = getRankColorFromString()
                     Text(
                         modifier = Modifier
@@ -179,7 +214,7 @@ fun ChallengeDetailHeader(item: ChallengeDetails) {
                             .background(DarkGrey, CutCornerShape(10.dp))
                             .border(4.dp, rankColor, CutCornerShape(10.dp))
                             .padding(8.dp),
-                        text = item.rank.name,
+                        text = this.name,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = rankColor
@@ -188,7 +223,7 @@ fun ChallengeDetailHeader(item: ChallengeDetails) {
 
                 Text(
                     modifier = Modifier.padding(start = 8.dp, end = 12.dp),
-                    text = item.name,
+                    text = name,
                     color = PrimaryLightGrey,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
@@ -206,7 +241,7 @@ fun ChallengeDetailHeader(item: ChallengeDetails) {
                     tint = PrimaryLightGrey
                 )
                 Text(
-                    text = "${item.totalStars}",
+                    text = "$totalStars",
                     color = PrimaryLightGrey
                 )
 
@@ -218,7 +253,7 @@ fun ChallengeDetailHeader(item: ChallengeDetails) {
                     tint = PrimaryLightGrey
                 )
                 Text(
-                    text = "${item.totalCompleted}",
+                    text = "$totalCompleted",
                     color = PrimaryLightGrey
                 )
 
@@ -230,7 +265,7 @@ fun ChallengeDetailHeader(item: ChallengeDetails) {
                     tint = PrimaryLightGrey
                 )
                 Text(
-                    text = item.createdBy.username,
+                    text = creatorUsername,
                     color = PrimaryLightGrey
                 )
             }
@@ -239,7 +274,7 @@ fun ChallengeDetailHeader(item: ChallengeDetails) {
 }
 
 @Composable
-fun ChallengeDetailDescription(item: ChallengeDetails) {
+fun ChallengeDetailDescription(itemDescription: String, tags: List<String>) {
     Box(
         modifier = Modifier
             .background(LightGrey, shape = RoundedCornerShape(8.dp))
@@ -255,7 +290,7 @@ fun ChallengeDetailDescription(item: ChallengeDetails) {
             )
             Text(
                 modifier = Modifier.padding(bottom = 12.dp),
-                text = item.description,
+                text = itemDescription,
                 fontSize = 16.sp,
                 color = PrimaryLightGrey
             )
@@ -269,7 +304,7 @@ fun ChallengeDetailDescription(item: ChallengeDetails) {
                     contentDescription = "Tags",
                     tint = PrimaryLightGrey
                 )
-                item.tags.forEach { tag ->
+                tags.forEach { tag ->
                     Text(
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.medium)
@@ -286,7 +321,16 @@ fun ChallengeDetailDescription(item: ChallengeDetails) {
 }
 
 @Composable
-fun ChallengeDetailStats(item: ChallengeDetails, onLinkClicked: (String) -> Unit) {
+fun ChallengeDetailStats(
+    totalAttempts: Long,
+    totalCompleted: Long,
+    totalStars: Long,
+    voteScore: Long,
+    creatorUsername: String,
+    creatorUrl: String,
+    publishedAt: String,
+    onLinkClicked: (String) -> Unit
+) {
     Box(
         modifier = Modifier
             .background(LightGrey, shape = RoundedCornerShape(8.dp))
@@ -300,16 +344,16 @@ fun ChallengeDetailStats(item: ChallengeDetails, onLinkClicked: (String) -> Unit
                 fontSize = 20.sp,
                 color = PrimaryLightGrey
             )
-            DetailStatsItem(title = "Total Attempts", value = "${item.totalAttempts}")
-            DetailStatsItem(title = "Total completed", value = "${item.totalCompleted}")
-            DetailStatsItem(title = "Total stars", value = "${item.totalStars}")
-            DetailStatsItem(title = "Vote score", value = "${item.voteScore}")
-            DetailStatsItem(title = "Created by", value = item.createdBy.username) {
-                if (item.createdBy.url.isNotEmpty()) {
-                    onLinkClicked(item.createdBy.url)
+            DetailStatsItem(title = "Total Attempts", value = "$totalAttempts")
+            DetailStatsItem(title = "Total completed", value = "$totalCompleted")
+            DetailStatsItem(title = "Total stars", value = "$totalStars")
+            DetailStatsItem(title = "Vote score", value = "$voteScore")
+            DetailStatsItem(title = "Created by", value = creatorUsername) {
+                if (creatorUrl.isNotEmpty()) {
+                    onLinkClicked(creatorUrl)
                 }
             }
-            DetailStatsItem(title = "Published at", value = item.publishedAt)
+            DetailStatsItem(title = "Published at", value = publishedAt)
         }
     }
 }

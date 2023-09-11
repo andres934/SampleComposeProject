@@ -59,6 +59,8 @@ fun ChallengesListScreen(
     val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
 
+    viewModel.getCompletedChallengesList()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -86,44 +88,15 @@ fun ChallengesListScreen(
             )
         }
     ) {
-        ChallengesListBody(
-            navController = navController,
-            listState = listState,
-            scrollState = scrollState,
-            paddingValues = it,
-            uiState = uiState
-        )
-    }
-}
-
-@Composable
-fun ChallengesListBody(
-    navController: NavController,
-    listState: LazyListState,
-    scrollState: ScrollState,
-    paddingValues: PaddingValues,
-    uiState: ListUiState
-) {
-    Box(
-        modifier = Modifier.padding(paddingValues),
-    ) {
         when (uiState) {
             is ListUiState.Success -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .scrollable(scrollState, Orientation.Vertical),
-                    state = listState
-                ) {
-                    items(uiState.challenges.data) {
-                        ChallengeUIItem(
-                            item = it,
-                            onItemClicked = { id ->
-                                navController.navigate(AppScreens.ChallengeDetailScreen.route + "/$id")
-                            }
-                        )
-                    }
-                }
+                ChallengesListBody(
+                    navController = navController,
+                    listState = listState,
+                    scrollState = scrollState,
+                    paddingValues = it,
+                    itemList = (uiState as ListUiState.Success).challenges.data
+                )
             }
 
             is ListUiState.Loading -> {
@@ -134,18 +107,55 @@ fun ChallengesListBody(
                 ErrorScreen()
             }
         }
-
     }
 }
 
 @Composable
-fun ChallengeUIItem(item: ChallengeItem, onItemClicked: (String) -> Unit) {
+fun ChallengesListBody(
+    navController: NavController,
+    listState: LazyListState,
+    scrollState: ScrollState,
+    paddingValues: PaddingValues,
+    itemList: List<ChallengeItem>
+) {
+    Box(
+        modifier = Modifier.padding(paddingValues),
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .padding(12.dp)
+                .scrollable(scrollState, Orientation.Vertical),
+            state = listState
+        ) {
+            items(itemList) {
+                ChallengeUIItem(
+                    itemId = it.id,
+                    name = it.name,
+                    completedAt = it.completedAt,
+                    completedLanguages = it.completedLanguages.joinToString(),
+                    onItemClicked = { id ->
+                        navController.navigate(AppScreens.ChallengeDetailScreen.route + "/$id")
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ChallengeUIItem(
+    itemId: String,
+    name: String,
+    completedAt: String,
+    completedLanguages: String,
+    onItemClicked: (String) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = LightGrey, shape = RoundedCornerShape(20.dp))
             .clickable(enabled = true) {
-                onItemClicked(item.id)
+                onItemClicked(itemId)
             }
             .testTag("ListItemContainer")
     ) {
@@ -155,18 +165,18 @@ fun ChallengeUIItem(item: ChallengeItem, onItemClicked: (String) -> Unit) {
                 .padding(12.dp)
         ) {
             Text(
-                text = item.name,
+                text = name,
                 color = PrimaryLightGrey,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
             Text(
-                text = item.completedAt,
+                text = completedAt,
                 color = PrimaryLightGrey,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Text(text = item.completedLanguages.joinToString(), color = PrimaryLightGrey)
+            Text(text = completedLanguages, color = PrimaryLightGrey)
         }
     }
     Spacer(modifier = Modifier.height(8.dp))

@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.rememberNavController
 import com.example.androidtechchallenge.data.mocks.FakeRepositoryImpl
 import com.example.androidtechchallenge.data.mocks.completedChallengesItemMock
+import com.example.androidtechchallenge.domain.ChallengesUseCase
 import com.example.androidtechchallenge.ui.screens.list.ChallengesListScreen
 import com.example.androidtechchallenge.ui.screens.list.ChallengesListViewModel
 import com.example.androidtechchallenge.util.getFormattedDateString
@@ -32,13 +33,11 @@ class ChallengeListScreenTest {
 
     @Test
     fun challengesListShouldShowItemsWhenCallSucceeds() {
-        val viewModel by lazy {
-            ChallengesListViewModel(
-                repository = fakeRepository,
-                backgroundCoroutineContext = testDispatcher,
-                foregroundCoroutineContext = testDispatcher
-            )
-        }
+        val useCase = ChallengesUseCase(fakeRepository)
+        val viewModel = ChallengesListViewModel(
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
+        )
         rule.setContent {
             ChallengesListScreen(
                 navController = rememberNavController(),
@@ -57,23 +56,25 @@ class ChallengeListScreenTest {
         rule.onAllNodesWithTag("ListItemContainer")[1].assertIsDisplayed().assertHasClickAction()
 
         rule.onNodeWithText(completedChallengesItemMock.data[0].name).assertIsDisplayed()
-        rule.onNodeWithText(completedChallengesItemMock.data[0].completedAt.getFormattedDateString()).assertIsDisplayed()
-        rule.onNodeWithText(completedChallengesItemMock.data[0].completedLanguages.joinToString()).assertIsDisplayed()
+        rule.onNodeWithText(completedChallengesItemMock.data[0].completedAt.getFormattedDateString())
+            .assertIsDisplayed()
+        rule.onNodeWithText(completedChallengesItemMock.data[0].completedLanguages.joinToString())
+            .assertIsDisplayed()
 
         rule.onNodeWithText(completedChallengesItemMock.data[1].name).assertIsDisplayed()
-        rule.onNodeWithText(completedChallengesItemMock.data[1].completedAt.getFormattedDateString()).assertIsDisplayed()
-        rule.onNodeWithText(completedChallengesItemMock.data[1].completedLanguages.joinToString()).assertIsDisplayed()
+        rule.onNodeWithText(completedChallengesItemMock.data[1].completedAt.getFormattedDateString())
+            .assertIsDisplayed()
+        rule.onNodeWithText(completedChallengesItemMock.data[1].completedLanguages.joinToString())
+            .assertIsDisplayed()
     }
 
     @Test
     fun whenRefreshTriggeredShouldShowProgressIndicatorAndOnSuccessShowItems() {
-        val viewModel by lazy {
-            ChallengesListViewModel(
-                repository = fakeRepository,
-                backgroundCoroutineContext = testDispatcher,
-                foregroundCoroutineContext = testDispatcher
-            )
-        }
+        val useCase = ChallengesUseCase(fakeRepository)
+        val viewModel = ChallengesListViewModel(
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
+        )
         rule.setContent {
             ChallengesListScreen(
                 navController = rememberNavController(),
@@ -92,24 +93,26 @@ class ChallengeListScreenTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         rule.onNodeWithText(completedChallengesItemMock.data[0].name).assertIsDisplayed()
-        rule.onNodeWithText(completedChallengesItemMock.data[0].completedAt.getFormattedDateString()).assertIsDisplayed()
-        rule.onNodeWithText(completedChallengesItemMock.data[0].completedLanguages.joinToString()).assertIsDisplayed()
+        rule.onNodeWithText(completedChallengesItemMock.data[0].completedAt.getFormattedDateString())
+            .assertIsDisplayed()
+        rule.onNodeWithText(completedChallengesItemMock.data[0].completedLanguages.joinToString())
+            .assertIsDisplayed()
 
         rule.onNodeWithText(completedChallengesItemMock.data[1].name).assertIsDisplayed()
-        rule.onNodeWithText(completedChallengesItemMock.data[1].completedAt.getFormattedDateString()).assertIsDisplayed()
-        rule.onNodeWithText(completedChallengesItemMock.data[1].completedLanguages.joinToString()).assertIsDisplayed()
+        rule.onNodeWithText(completedChallengesItemMock.data[1].completedAt.getFormattedDateString())
+            .assertIsDisplayed()
+        rule.onNodeWithText(completedChallengesItemMock.data[1].completedLanguages.joinToString())
+            .assertIsDisplayed()
     }
 
     @Test
     fun shouldShowErrorMessageIfCallFails() {
         val fakeFailRepository = FakeRepositoryImpl(shouldFail = true)
-        val viewModel by lazy {
-            ChallengesListViewModel(
-                repository = fakeFailRepository,
-                backgroundCoroutineContext = testDispatcher,
-                foregroundCoroutineContext = testDispatcher
-            )
-        }
+        val useCase = ChallengesUseCase(fakeFailRepository)
+        val viewModel = ChallengesListViewModel(
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
+        )
         rule.setContent {
             ChallengesListScreen(
                 navController = rememberNavController(),
@@ -130,13 +133,11 @@ class ChallengeListScreenTest {
     @Test
     fun shouldShowErrorMessageIfCallFailsWhenRefreshing() {
         val fakeFailRepository = FakeRepositoryImpl(shouldFail = true)
-        val viewModel by lazy {
-            ChallengesListViewModel(
-                repository = fakeFailRepository,
-                backgroundCoroutineContext = testDispatcher,
-                foregroundCoroutineContext = testDispatcher
-            )
-        }
+        val useCase = ChallengesUseCase(fakeFailRepository)
+        val viewModel = ChallengesListViewModel(
+            useCase = useCase,
+            backgroundCoroutineContext = testDispatcher
+        )
         rule.setContent {
             ChallengesListScreen(
                 navController = rememberNavController(),
