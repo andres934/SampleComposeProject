@@ -2,6 +2,9 @@ package com.example.androidtechchallenge.ui.screens.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import com.example.androidtechchallenge.domain.ChallengesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,14 +23,10 @@ class ChallengesListViewModel(
     fun getCompletedChallengesList() {
         viewModelScope.launch(backgroundCoroutineContext) {
             runCatching {
-                useCase.getCompletedChallengesList()
+                useCase.getCompletedChallengesList(viewModelScope)
             }.fold(
                 {
-                    val result = it?.run {
-                        ListUiState.Success(this)
-                    } ?: ListUiState.Failed
-
-                    _uiState.emit(result)
+                    _uiState.emit(ListUiState.Success(it))
                 },
                 {
                     _uiState.emit(ListUiState.Failed)

@@ -29,6 +29,7 @@ class ChallengesRepositoryImpl: ChallengesRepository {
                             )
                         continuation.resumeWithException(error)
                     }
+                    
                 }
 
                 override fun onFailure(call: Call<CompletedChallengesResponse>, t: Throwable) {

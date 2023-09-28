@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.compose.navigation)
     implementation(platform(libs.compose.bom))
+    implementation(libs.paging)
     implementation(libs.ui)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)

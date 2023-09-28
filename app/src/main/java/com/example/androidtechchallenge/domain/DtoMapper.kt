@@ -56,6 +56,15 @@ private fun List<CompletedChallengeDto>.toChallengeItems() =
         )
     }
 
+fun CompletedChallengeDto.toChallengeItem() =
+    ChallengeItem(
+        id = id,
+        name = name,
+        slug = slug,
+        completedAt = completedAt.getFormattedDateString(),
+        completedLanguages = completedLanguages
+    )
+
 private fun RankDto.toRank() =
     Rank(
         id = id,

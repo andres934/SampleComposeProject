@@ -8,7 +8,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ChallengesService {
-    @GET("users/andres934/code-challenges/completed")
+    @GET("users/rchan510/code-challenges/completed")
     fun getCompletedChallenges(@Query("page") page: Int): Call<CompletedChallengesResponse>
 
     @GET("code-challenges/{challenge}")

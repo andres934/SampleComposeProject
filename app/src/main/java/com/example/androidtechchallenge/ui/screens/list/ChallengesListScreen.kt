@@ -46,6 +46,9 @@ import com.example.androidtechchallenge.ui.theme.DarkGrey
 import com.example.androidtechchallenge.ui.theme.LightGrey
 import com.example.androidtechchallenge.ui.theme.PrimaryLightGrey
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.example.androidtechchallenge.domain.models.ChallengeItem
 import com.example.androidtechchallenge.ui.components.ErrorScreen
 import com.example.androidtechchallenge.ui.components.LoadingScreen
@@ -95,7 +98,7 @@ fun ChallengesListScreen(
                     listState = listState,
                     scrollState = scrollState,
                     paddingValues = it,
-                    itemList = (uiState as ListUiState.Success).challenges.data
+                    itemList = (uiState as ListUiState.Success).challenges.collectAsLazyPagingItems()
                 )
             }
 
@@ -116,7 +119,7 @@ fun ChallengesListBody(
     listState: LazyListState,
     scrollState: ScrollState,
     paddingValues: PaddingValues,
-    itemList: List<ChallengeItem>
+    itemList: LazyPagingItems<ChallengeItem>
 ) {
     Box(
         modifier = Modifier.padding(paddingValues),
@@ -127,16 +130,18 @@ fun ChallengesListBody(
                 .scrollable(scrollState, Orientation.Vertical),
             state = listState
         ) {
-            items(itemList) {
-                ChallengeUIItem(
-                    itemId = it.id,
-                    name = it.name,
-                    completedAt = it.completedAt,
-                    completedLanguages = it.completedLanguages.joinToString(),
-                    onItemClicked = { id ->
-                        navController.navigate(AppScreens.ChallengeDetailScreen.route + "/$id")
-                    }
-                )
+            items(items = itemList) {
+                it?.run {
+                    ChallengeUIItem(
+                        itemId = id,
+                        name = name,
+                        completedAt = completedAt,
+                        completedLanguages = completedLanguages.joinToString(),
+                        onItemClicked = { id ->
+                            navController.navigate(AppScreens.ChallengeDetailScreen.route + "/$id")
+                        }
+                    )
+                }
             }
         }
     }
